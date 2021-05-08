@@ -1,0 +1,25 @@
+version: "3.9"
+services: 
+  app:
+    build: .
+    container_name: swapp
+    volumes: 
+      - .:/go/src
+    ports:
+      - 8000:8000
+    depends_on: 
+      - mongodb
+    links: 
+      - mongodb
+    
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - swapidb:/data/db
+
+volumes:
+  swapidb:
