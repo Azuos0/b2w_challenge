@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/Azuos0/b2w_challenge/app/controller"
 	"github.com/Azuos0/b2w_challenge/app/database"
 	"github.com/Azuos0/b2w_challenge/app/routes"
 	"github.com/gorilla/mux"
@@ -25,10 +26,15 @@ func (app *App) InitializeApp() {
 		log.Println(err)
 	}
 
+	planetController := controller.PlanetController{}
+	planetController.SetService(app.DB)
+
 	app.Router = mux.NewRouter()
-	routes.InitializeRouter(app.Router, app.DB)
+	routes.InitializeMainRouter(app.Router)
+	routes.InititializePlanetRoutes(app.Router, &planetController)
 }
 
 func (app *App) Run(port string) {
+	log.Printf("Server listening at port %v \n", port)
 	log.Fatal(http.ListenAndServe(port, app.Router))
 }

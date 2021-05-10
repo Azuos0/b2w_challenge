@@ -92,7 +92,6 @@ func (client *PlanetService) Search(name string) ([]models.Planet, error) {
 	var filter bson.M
 
 	if name == "" {
-		// if filter == nil {
 		filter = bson.M{}
 	} else {
 		filter = bson.M{"name": bson.M{"$regex": name, "$options": "im"}}

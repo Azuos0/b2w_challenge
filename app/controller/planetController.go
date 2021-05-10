@@ -9,9 +9,18 @@ import (
 	"github.com/Azuos0/b2w_challenge/app/services"
 	"github.com/Azuos0/b2w_challenge/app/utils"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CreatePlanet(planetService *services.PlanetService) http.HandlerFunc {
+type PlanetController struct {
+	PlanetService *services.PlanetService
+}
+
+func (c *PlanetController) SetService(db *mongo.Database) {
+	c.PlanetService = services.NewPlanetService(db)
+}
+
+func (controller *PlanetController) CreatePlanet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		planet := models.Planet{}
 
@@ -33,7 +42,7 @@ func CreatePlanet(planetService *services.PlanetService) http.HandlerFunc {
 			return
 		}
 
-		res, err := planetService.Create(planet)
+		res, err := controller.PlanetService.Create(planet)
 		if err != nil {
 			utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -43,12 +52,12 @@ func CreatePlanet(planetService *services.PlanetService) http.HandlerFunc {
 	}
 }
 
-func GetPlanet(planetService *services.PlanetService) http.HandlerFunc {
+func (controller *PlanetController) GetPlanet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		id := params["id"]
 
-		res, err := planetService.Get(id)
+		res, err := controller.PlanetService.Get(id)
 		if err != nil {
 			utils.RespondWithError(w, http.StatusBadRequest, err.Error())
 			return
@@ -58,11 +67,16 @@ func GetPlanet(planetService *services.PlanetService) http.HandlerFunc {
 	}
 }
 
-func Search(planetService *services.PlanetService) http.HandlerFunc {
+func (controller *PlanetController) Search() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		query := r.URL.Query().Get("name")
+		name := r.URL.Query().Get("name")
+		page := r.URL.Query().Get("page")
 
-		res, err := planetService.Search(query)
+		if page == "" {
+			page = "0"
+		}
+
+		res, err := controller.PlanetService.Search(name)
 		if err != nil {
 			utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -72,12 +86,12 @@ func Search(planetService *services.PlanetService) http.HandlerFunc {
 	}
 }
 
-func DeletePlanet(planetService *services.PlanetService) http.HandlerFunc {
+func (controller *PlanetController) DeletePlanet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		id := params["id"]
 
-		res, err := planetService.Delete(id)
+		res, err := controller.PlanetService.Delete(id)
 		if err != nil {
 			utils.RespondWithError(w, http.StatusBadRequest, err.Error())
 			return

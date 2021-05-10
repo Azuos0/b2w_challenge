@@ -3,9 +3,10 @@ TODO
 - regex para busca dos nomes - feito
 - alterar os status de error dos requests (deixar condizente com o erro encontrado) - feito
 - otimização das conexões com o banco de dados (alteração do contexto) - feito
+- remover passagem do banco como parâmetro para as rotas - feito
 - paginação dos resultados do método search/find
 - finalização do docker
 - criação dos testes automatizados
-- CI com github actions
-- Comentar o código
+- Documentar o código
 - Atualizar o readme com as instruções de como rodar o sistema
+- CI com github actions
