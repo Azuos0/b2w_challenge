@@ -3,35 +3,36 @@ package database
 import (
 	"context"
 	"os"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func dbInstance() (*mongo.Client, context.Context, error) {
+func dbInstance() (*mongo.Client, error) {
 	mongoURI := os.Getenv("MONGODB_URL")
-
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	ctx := context.TODO()
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
 
 	err = client.Connect(ctx)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	return client, ctx, nil
+	return client, nil
 }
 
-func Connect(database string) (*mongo.Database, context.Context, error) {
-	client, ctx, err := dbInstance()
+func Connect(database string) (*mongo.Database, error) {
+	client, err := dbInstance()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return client.Database(database), ctx, nil
+	return client.Database(database), nil
 }
 
 func GetCollection(database *mongo.Database, collectionName string) *mongo.Collection {

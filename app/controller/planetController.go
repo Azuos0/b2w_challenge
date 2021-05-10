@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func CreatePlanet(planetService *services.PlanetClient) http.HandlerFunc {
+func CreatePlanet(planetService *services.PlanetService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		planet := models.Planet{}
 
@@ -35,15 +35,15 @@ func CreatePlanet(planetService *services.PlanetClient) http.HandlerFunc {
 
 		res, err := planetService.Create(planet)
 		if err != nil {
-			utils.RespondWithError(w, http.StatusBadRequest, err.Error())
+			utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		utils.RespondWithJSON(w, http.StatusOK, res)
+		utils.RespondWithJSON(w, http.StatusCreated, res)
 	}
 }
 
-func GetPlanet(planetService *services.PlanetClient) http.HandlerFunc {
+func GetPlanet(planetService *services.PlanetService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		id := params["id"]
@@ -58,7 +58,7 @@ func GetPlanet(planetService *services.PlanetClient) http.HandlerFunc {
 	}
 }
 
-func Search(planetService *services.PlanetClient) http.HandlerFunc {
+func Search(planetService *services.PlanetService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query().Get("name")
 
@@ -72,7 +72,7 @@ func Search(planetService *services.PlanetClient) http.HandlerFunc {
 	}
 }
 
-func DeletePlanet(planetService *services.PlanetClient) http.HandlerFunc {
+func DeletePlanet(planetService *services.PlanetService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		id := params["id"]

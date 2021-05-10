@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"os"
@@ -15,20 +14,19 @@ import (
 type App struct {
 	Router *mux.Router
 	DB     *mongo.Database
-	Ctx    context.Context
 }
 
 func (app *App) InitializeApp() {
 	var err error
 
-	app.DB, app.Ctx, err = database.Connect(os.Getenv("MONGODB_DATABASE"))
+	app.DB, err = database.Connect(os.Getenv("MONGODB_DATABASE"))
 
 	if err != nil {
 		log.Println(err)
 	}
 
 	app.Router = mux.NewRouter()
-	routes.InitializeRouter(app.Router, app.DB, app.Ctx)
+	routes.InitializeRouter(app.Router, app.DB)
 }
 
 func (app *App) Run(port string) {

@@ -1,10 +1,9 @@
 TODO
 - validação do body vindo do request - feito
 - regex para busca dos nomes - feito
+- alterar os status de error dos requests (deixar condizente com o erro encontrado) - feito
+- otimização das conexões com o banco de dados (alteração do contexto) - feito
 - paginação dos resultados do método search/find
-- garantir que o nome sempre seja com a primeira letra em maiúsculo
-- alterar os status de error dos requests (deixar condizente com o erro encontrado)
-- otimização das conexões com o banco de dados (alteração do contexto)
 - finalização do docker
 - criação dos testes automatizados
 - CI com github actions

@@ -15,8 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type PlanetClient struct {
-	Ctx        context.Context
+type PlanetService struct {
 	Collection *mongo.Collection
 }
 
@@ -44,48 +43,51 @@ type swapiPlanet struct {
 	Films           []string `json:"films"`
 }
 
-func NewPlanetClient(ctx context.Context, db *mongo.Database) *PlanetClient {
-	client := &PlanetClient{
-		Ctx:        ctx,
+func NewPlanetService(db *mongo.Database) *PlanetService {
+	client := &PlanetService{
 		Collection: database.GetCollection(db, "planets"),
 	}
 
 	return client
 }
 
-func (client *PlanetClient) Create(planet models.Planet) (models.Planet, error) {
-	p := models.Planet{}
-
+func (client *PlanetService) Create(planet models.Planet) (*models.Planet, error) {
 	planet.ID = primitive.NewObjectID()
 	planet.Appearances, _ = getPlanetNumberOfApperances(planet.Name)
 	planet.CreatedAt = time.Now()
 
-	res, err := client.Collection.InsertOne(client.Ctx, planet)
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+
+	res, err := client.Collection.InsertOne(ctx, planet)
 	if err != nil {
-		return p, err
+		return nil, err
 	}
 
 	id := res.InsertedID.(primitive.ObjectID).Hex()
 	return client.Get(id)
 }
 
-func (client *PlanetClient) Get(id string) (models.Planet, error) {
+func (client *PlanetService) Get(id string) (*models.Planet, error) {
 	planet := models.Planet{}
 
 	_id, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return planet, err
+		return &planet, err
 	}
 
-	err = client.Collection.FindOne(client.Ctx, bson.M{"_id": _id}).Decode(&planet)
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+
+	err = client.Collection.FindOne(ctx, bson.M{"_id": _id}).Decode(&planet)
 	if err != nil {
-		return planet, err
+		return nil, err
 	}
 
-	return planet, nil
+	return &planet, nil
 }
 
-func (client *PlanetClient) Search(name string) ([]models.Planet, error) {
+func (client *PlanetService) Search(name string) ([]models.Planet, error) {
 	planets := []models.Planet{}
 	var filter bson.M
 
@@ -96,12 +98,15 @@ func (client *PlanetClient) Search(name string) ([]models.Planet, error) {
 		filter = bson.M{"name": bson.M{"$regex": name, "$options": "im"}}
 	}
 
-	cursor, err := client.Collection.Find(client.Ctx, filter)
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+
+	cursor, err := client.Collection.Find(ctx, filter)
 	if err != nil {
 		return planets, err
 	}
 
-	for cursor.Next(client.Ctx) {
+	for cursor.Next(ctx) {
 		row := models.Planet{}
 		cursor.Decode(&row)
 		planets = append(planets, row)
@@ -110,18 +115,26 @@ func (client *PlanetClient) Search(name string) ([]models.Planet, error) {
 	return planets, nil
 }
 
-func (client *PlanetClient) Delete(id string) (string, error) {
+func (client *PlanetService) Delete(id string) (string, error) {
 	_id, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return "", err
 	}
 
-	res, err := client.Collection.DeleteOne(client.Ctx, bson.M{"_id": _id})
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+
+	res, err := client.Collection.DeleteOne(ctx, bson.M{"_id": _id})
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("%v planet deleted successfully!", res.DeletedCount), nil
+	if res.DeletedCount > 0 {
+		return "Planet was deleted successfully!", nil
+	} else {
+		return "No planet with this id was found in this so far far galaxy!", nil
+	}
+
 }
 
 func getPlanetNumberOfApperances(name string) (int, error) {

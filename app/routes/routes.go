@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 
@@ -11,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func InitializeRouter(router *mux.Router, db *mongo.Database, ctx context.Context) {
+func InitializeRouter(router *mux.Router, db *mongo.Database) {
 	router.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		response, _ := json.Marshal(map[string]string{
 			"message": "Welcome to the Star Wars Planet App API 😉",
@@ -22,13 +21,13 @@ func InitializeRouter(router *mux.Router, db *mongo.Database, ctx context.Contex
 		w.Write(response)
 	}).Methods("GET")
 
-	planetClient := services.NewPlanetClient(ctx, db)
-	inititializePlanetRoutes(router, planetClient)
+	inititializePlanetRoutes(router, db)
 }
 
-func inititializePlanetRoutes(router *mux.Router, planetClient *services.PlanetClient) {
-	router.HandleFunc("/api/planets", controller.Search(planetClient)).Methods("GET")
-	router.HandleFunc("/api/planet", controller.CreatePlanet(planetClient)).Methods("POST")
-	router.HandleFunc("/api/planet/{id}", controller.GetPlanet(planetClient)).Methods("GET")
-	router.HandleFunc("/api/planet/{id}", controller.DeletePlanet(planetClient)).Methods("DELETE")
+func inititializePlanetRoutes(router *mux.Router, db *mongo.Database) {
+	planetService := services.NewPlanetService(db)
+	router.HandleFunc("/api/planets", controller.Search(planetService)).Methods("GET")
+	router.HandleFunc("/api/planet", controller.CreatePlanet(planetService)).Methods("POST")
+	router.HandleFunc("/api/planet/{id}", controller.GetPlanet(planetService)).Methods("GET")
+	router.HandleFunc("/api/planet/{id}", controller.DeletePlanet(planetService)).Methods("DELETE")
 }
