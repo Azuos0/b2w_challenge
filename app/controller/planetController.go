@@ -27,6 +27,12 @@ func CreatePlanet(planetService *services.PlanetClient) http.HandlerFunc {
 			return
 		}
 
+		err = planet.Validate()
+		if err != nil {
+			utils.RespondWithError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
 		res, err := planetService.Create(planet)
 		if err != nil {
 			utils.RespondWithError(w, http.StatusBadRequest, err.Error())
@@ -54,14 +60,9 @@ func GetPlanet(planetService *services.PlanetClient) http.HandlerFunc {
 
 func Search(planetService *services.PlanetClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var filter interface{}
 		query := r.URL.Query().Get("name")
 
-		if query != "" {
-			filter = map[string]string{"name": query}
-		}
-
-		res, err := planetService.Search(filter)
+		res, err := planetService.Search(query)
 		if err != nil {
 			utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 			return

@@ -28,7 +28,7 @@ func InitializeRouter(router *mux.Router, db *mongo.Database, ctx context.Contex
 
 func inititializePlanetRoutes(router *mux.Router, planetClient *services.PlanetClient) {
 	router.HandleFunc("/api/planets", controller.Search(planetClient)).Methods("GET")
-	router.HandleFunc("/api/planets", controller.CreatePlanet(planetClient)).Methods("POST")
-	router.HandleFunc("/api/planets/{id}", controller.GetPlanet(planetClient)).Methods("GET")
-	router.HandleFunc("/api/planets/{id}", controller.DeletePlanet(planetClient)).Methods("DELETE")
+	router.HandleFunc("/api/planet", controller.CreatePlanet(planetClient)).Methods("POST")
+	router.HandleFunc("/api/planet/{id}", controller.GetPlanet(planetClient)).Methods("GET")
+	router.HandleFunc("/api/planet/{id}", controller.DeletePlanet(planetClient)).Methods("DELETE")
 }
