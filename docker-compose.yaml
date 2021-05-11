@@ -11,15 +11,20 @@ services:
       - mongodb
     links: 
       - mongodb
+    networks: 
+      - swapi
     
   mongodb:
     image: mongo
     container_name: mongodb
     restart: always
-    ports:
-      - 27017:27017
+    networks: 
+      - swapi
     volumes:
       - swapidb:/data/db
 
 volumes:
   swapidb:
+networks: 
+  swapi:
+    driver: bridge

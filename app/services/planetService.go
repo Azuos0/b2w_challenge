@@ -158,5 +158,12 @@ func getPlanetNumberOfApperances(name string) (int, error) {
 		return 0, nil
 	}
 
+	planetName := swapiRes.Results[0].Name
+
+	//if planets have different names
+	if !strings.EqualFold(name, planetName) {
+		return 0, nil
+	}
+
 	return len(swapiRes.Results[0].Films), nil
 }

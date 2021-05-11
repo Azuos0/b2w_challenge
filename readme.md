@@ -6,7 +6,7 @@ TODO
 - remover passagem do banco como parâmetro para as rotas - feito
 - paginação dos resultados do método search/find
 - finalização do docker - 30%
-- criação dos testes automatizados - 80% (faltam o método search do service, initializeApp do server e quase todo o planetController)
+- criação dos testes automatizados - 90% (faltam o método search do service e do planetController)
 - Documentar o código - 0%
 - Atualizar o readme com as instruções de como rodar o sistema
 - CI com github actions

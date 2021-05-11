@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetExistentPlanetNumberOfApperances(t *testing.T) {
-	planetName := "Tatooine"
+	planetName := "tatooine"
 
 	apperances, err := getPlanetNumberOfApperances(planetName)
 
