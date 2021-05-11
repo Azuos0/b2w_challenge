@@ -3,7 +3,6 @@ package server
 import (
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/Azuos0/b2w_challenge/app/controller"
 	"github.com/Azuos0/b2w_challenge/app/database"
@@ -17,10 +16,10 @@ type App struct {
 	DB     *mongo.Database
 }
 
-func (app *App) InitializeApp() {
+func (app *App) InitializeApp(uri string) {
 	var err error
 
-	app.DB, err = database.Connect(os.Getenv("MONGODB_DATABASE"))
+	app.DB, err = database.Connect(uri)
 
 	if err != nil {
 		log.Println(err)

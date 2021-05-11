@@ -3,9 +3,11 @@ package services
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Azuos0/b2w_challenge/app/database"
@@ -20,13 +22,8 @@ type PlanetService struct {
 }
 
 type swapiPlanetResponse struct {
-	Count    int           `json:"count"`
-	Next     string        `json:"next"`
-	Previous string        `json:"previous"`
-	Created  time.Time     `json:"created"`
-	Edited   time.Time     `json:"edited"`
-	Url      string        `json:"url"`
-	Results  []swapiPlanet `json:"results"`
+	Count   int           `json:"count"`
+	Results []swapiPlanet `json:"results"`
 }
 
 type swapiPlanet struct {
@@ -73,7 +70,7 @@ func (client *PlanetService) Get(id string) (*models.Planet, error) {
 
 	_id, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return &planet, err
+		return nil, err
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
@@ -131,13 +128,15 @@ func (client *PlanetService) Delete(id string) (string, error) {
 	if res.DeletedCount > 0 {
 		return "Planet was deleted successfully!", nil
 	} else {
-		return "No planet with this id was found in this so far far galaxy!", nil
+		err = errors.New("no planet with this id was found in this so far far away galaxy")
+		return "", err
 	}
 
 }
 
 func getPlanetNumberOfApperances(name string) (int, error) {
 	swapiRes := swapiPlanetResponse{}
+	name = strings.ReplaceAll(name, " ", "%20") //replace whitespaces for equivalent %20 for url
 
 	res, err := http.Get(fmt.Sprintf("https://swapi.dev/api/planets/?search=%v", name))
 	if err != nil {

@@ -19,7 +19,8 @@ func main() {
 		}
 	}
 
-	app.InitializeApp()
+	uri := os.Getenv("MONGODB_DATABASE")
+	app.InitializeApp(uri)
 
 	port := os.Getenv("PORT")
 	app.Run(port)

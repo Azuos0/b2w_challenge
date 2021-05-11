@@ -59,6 +59,11 @@ func (controller *PlanetController) GetPlanet() http.HandlerFunc {
 
 		res, err := controller.PlanetService.Get(id)
 		if err != nil {
+			if err == mongo.ErrNoDocuments {
+				utils.RespondWithError(w, http.StatusNotFound, err.Error())
+				return
+			}
+
 			utils.RespondWithError(w, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -93,6 +98,10 @@ func (controller *PlanetController) DeletePlanet() http.HandlerFunc {
 
 		res, err := controller.PlanetService.Delete(id)
 		if err != nil {
+			if err.Error() == "no planet with this id was found in this so far far away galaxy" {
+				utils.RespondWithError(w, http.StatusNotFound, err.Error())
+				return
+			}
 			utils.RespondWithError(w, http.StatusBadRequest, err.Error())
 			return
 		}
