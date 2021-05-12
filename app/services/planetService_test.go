@@ -126,7 +126,62 @@ func TestGetInvalidId(t *testing.T) {
 	clearDatabase(service.Collection)
 }
 
-func TestSearchPlanets(t *testing.T) {}
+func TestListPlanets(t *testing.T) {
+	planet1 := models.Planet{
+		Name:    "Tatooine",
+		Climate: "Arid",
+		Terrain: "Desert",
+	}
+
+	planet2 := models.Planet{
+		Name:    "Tund",
+		Climate: "unknown",
+		Terrain: "barren, ash",
+	}
+
+	mock1, service := mockPlanet(planet1)
+	mock2, _ := mockPlanet(planet2)
+
+	planets := &[]models.Planet{*mock1, *mock2}
+
+	res, err := service.Search(1, "")
+
+	require.Nil(t, err)
+	require.Equal(t, planets, res.Result)
+	require.Equal(t, int64(2), res.Total)
+
+	clearDatabase(service.Collection)
+}
+
+// func TestSearchPlanet(t *testing.T) {
+// 	planet1 := models.Planet{
+// 		Name:    "Tatooine",
+// 		Climate: "Arid",
+// 		Terrain: "Desert",
+// 	}
+
+// 	planet2 := models.Planet{
+// 		Name:    "Tund",
+// 		Climate: "unknown",
+// 		Terrain: "barren, ash",
+// 	}
+
+// 	mockedPlanet, service := mockPlanet(planet1)
+// 	mockPlanet(planet2)
+
+// 	res, err := service.Search(1, mockedPlanet.Name)
+
+// 	require.Nil(t, err)
+// 	require.Equal(t, int64(1), res.Total)
+
+// 	for _, p range res.Result {
+
+// 	}
+
+// 	require.Equal(t, int64(1), res.Total)
+
+// 	clearDatabase(service.Collection)
+// }
 
 func TestDeletePlanet(t *testing.T) {
 	planet := models.Planet{

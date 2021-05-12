@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/Azuos0/b2w_challenge/app/models"
 	"github.com/Azuos0/b2w_challenge/app/services"
@@ -77,11 +78,17 @@ func (controller *PlanetController) Search() http.HandlerFunc {
 		name := r.URL.Query().Get("name")
 		page := r.URL.Query().Get("page")
 
-		if page == "" {
-			page = "0"
+		var searchPage int64 = 1
+		var err error
+		
+		if page != "" {
+			searchPage, err = strconv.ParseInt(page, 10, 32)
+			if err != nil {
+				searchPage = 1
+			}
 		}
 
-		res, err := controller.PlanetService.Search(name)
+		res, err := controller.PlanetService.Search(searchPage, name)
 		if err != nil {
 			utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 			return

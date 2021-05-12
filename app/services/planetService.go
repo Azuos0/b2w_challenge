@@ -12,6 +12,7 @@ import (
 
 	"github.com/Azuos0/b2w_challenge/app/database"
 	"github.com/Azuos0/b2w_challenge/app/models"
+	mongopagination "github.com/gobeam/mongo-go-pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,6 +20,16 @@ import (
 
 type PlanetService struct {
 	Collection *mongo.Collection
+}
+
+type SearchResponse struct {
+	Page      int64            `json:"page"`
+	PerPage   int64            `json:"perPage"`
+	Prev      int64            `json:"prev"`
+	Next      int64            `json:"next"`
+	Total     int64            `json:"total"`
+	TotalPage int64            `json:"totalPage"`
+	Result    *[]models.Planet `json:"result"`
 }
 
 type swapiPlanetResponse struct {
@@ -84,33 +95,6 @@ func (client *PlanetService) Get(id string) (*models.Planet, error) {
 	return &planet, nil
 }
 
-func (client *PlanetService) Search(name string) ([]models.Planet, error) {
-	planets := []models.Planet{}
-	var filter bson.M
-
-	if name == "" {
-		filter = bson.M{}
-	} else {
-		filter = bson.M{"name": bson.M{"$regex": name, "$options": "im"}}
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
-	defer cancel()
-
-	cursor, err := client.Collection.Find(ctx, filter)
-	if err != nil {
-		return planets, err
-	}
-
-	for cursor.Next(ctx) {
-		row := models.Planet{}
-		cursor.Decode(&row)
-		planets = append(planets, row)
-	}
-
-	return planets, nil
-}
-
 func (client *PlanetService) Delete(id string) (string, error) {
 	_id, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -166,4 +150,35 @@ func getPlanetNumberOfApperances(name string) (int, error) {
 	}
 
 	return len(swapiRes.Results[0].Films), nil
+}
+
+func (client *PlanetService) Search(page int64, name string) (*SearchResponse, error) {
+	planets := []models.Planet{}
+	var filter bson.M
+
+	if name == "" {
+		filter = bson.M{}
+	} else {
+		filter = bson.M{"name": bson.M{"$regex": name, "$options": "im"}}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+
+	paginatedData, err := mongopagination.New(client.Collection).Context(ctx).Limit(30).Page(page).Filter(filter).Decode(&planets).Find()
+	if err != nil {
+		return nil, err
+	}
+
+	result := SearchResponse{
+		Page:      paginatedData.Pagination.Page,
+		Next:      paginatedData.Pagination.Next,
+		Prev:      paginatedData.Pagination.Prev,
+		PerPage:   paginatedData.Pagination.PerPage,
+		Total:     paginatedData.Pagination.Total,
+		TotalPage: paginatedData.Pagination.TotalPage,
+		Result:    &planets,
+	}
+
+	return &result, nil
 }
