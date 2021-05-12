@@ -32,9 +32,6 @@ Bancos que usamos: MongoDB, Cassandra, DynamoDB, Datomic, ELK.
 
 E lembre-se! Um bom software é um software bem testado.
 
-May the force be with you!
-
-
 ## Rodando o sistema com Docker
 
 Caso você possua o docker instalado na sua máquina basta apenas clonar esse repositório e criar um arquivo .env na raiz do projeto, copiando as informações do arquivo .env.example (apresentadas abaixo) para o .env.
@@ -47,7 +44,7 @@ MONGODB_DATABASE="swapp"
 MONGODB_TEST_DATABASE="swapp_test"
 ```
 
-Feito isso, basta apenas abrir um terminal na pasta do projeto e digitar o comando:
+Feito isso, abra um terminal na raiz do projeto e digite o comando:
 ```docker
 docker-compose up -d 
 ```
@@ -59,9 +56,9 @@ E está feito! Você está pronto para adicionar planetas à sua galáxia!!!
 Com os containers do sistema rodando, abra um terminal e digite
 
 ```docker
-docker exec -it swapp /bin/sh   # comando para entrar no container
+docker exec -it swapp /bin/sh      # comando para entrar no container
 
-go test ./...                   # roda todos os testes automatizados após entrar no container
+go test -v ./...                   # roda todos os testes automatizados após entrar no container
 ```
 
 ## Rodando sem o docker
@@ -72,16 +69,21 @@ Feito isso, você precisa criar o arquivo .env na raiz do projeto com os dados d
 ```docker
 #.env
 PORT=":8000"
-MONGODB_URL= #Aqui vai a url do seu cluster
-MONGODB_DATABASE= #seu banco de dados
-MONGODB_TEST_DATABASE= #o banco de dados que será utilizado para os testes automatizados
+MONGODB_URL=            #Aqui vai a url do seu cluster
+MONGODB_DATABASE=       #seu banco de dados
+MONGODB_TEST_DATABASE=  #o banco de dados que será utilizado para os testes automatizados
 ```
 
 Abrir um terminal na raiz do projeto e baixar as dependências de desenvolvimento e rodar sua aplicação
 
 ```docker
-go mod download # baixa as dependências
-go run app/main.go # roda a aplicação
+go mod download       # baixa as dependências
+go run app/main.go    # roda a aplicação
+```
+
+Para rodar todos os testes da aplicação é necessário ter um terminal aberto na raiz do projeto e rodar o comando
+```docker
+go test -v ./...
 ```
 
 ## Endpoints
@@ -90,7 +92,7 @@ go run app/main.go # roda a aplicação
   - Method: GET | Mensagem de boas-vindas
 - localhost:8000/api/planet 
   - Method: POST | Adiciona um novo planeta
-  - Request body
+  - Request body:
     - name: string - obrigatório
     - climate: string - obrigatório
     - terrain: string - obrigatório
@@ -103,3 +105,6 @@ go run app/main.go # roda a aplicação
   - Query params:
     - name: nome do planeta
     - page: página da lista 
+
+
+# May the force be with you!
