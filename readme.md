@@ -1,12 +1,105 @@
-TODO
-- validação do body vindo do request - feito
-- regex para busca dos nomes - feito
-- alterar os status de error dos requests (deixar condizente com o erro encontrado) - feito
-- otimização das conexões com o banco de dados (alteração do contexto) - feito
-- remover passagem do banco como parâmetro para as rotas - feito
-- paginação dos resultados do método search/find
-- finalização do docker - 100%
-- criação dos testes automatizados - 90% (faltam o método search do service e do planetController)
-- Documentar o código - 0%
-- Atualizar o readme com as instruções de como rodar o sistema
-- CI com github actions
+# B2W Digital - Star Wars Challenge
+
+## Sobre o desafio
+
+Requisitos:
+
+- A API deve ser REST
+
+- Para cada planeta, os seguintes dados devem ser obtidos do banco de dados da aplicação, sendo inserido manualmente:
+
+      Nome
+      Clima
+      Terreno
+
+
+- Para cada planeta também devemos ter a quantidade de aparições em filmes, que podem ser obtidas pela API pública do Star Wars: https://swapi.dev/about
+
+Funcionalidades desejadas: 
+
+- Adicionar um planeta (com nome, clima e terreno)
+
+- Listar planetas
+
+- Buscar por nome
+
+- Buscar por ID
+
+- Remover planeta
+
+OBS: A linguagem para realização do desafio será correspondente a do anúncio da vaga.
+Bancos que usamos: MongoDB, Cassandra, DynamoDB, Datomic, ELK.
+
+E lembre-se! Um bom software é um software bem testado.
+
+May the force be with you!
+
+
+## Rodando o sistema com Docker
+
+Caso você possua o docker instalado na sua máquina basta apenas clonar esse repositório e criar um arquivo .env na raiz do projeto, copiando as informações do arquivo .env.example (apresentadas abaixo) para o .env.
+
+```docker
+#.env.example
+PORT=":8000"
+MONGODB_URL="mongodb://mongodb:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false"
+MONGODB_DATABASE="swapp"
+MONGODB_TEST_DATABASE="swapp_test"
+```
+
+Feito isso, basta apenas abrir um terminal na pasta do projeto e digitar o comando:
+```docker
+docker-compose up -d 
+```
+
+E está feito! Você está pronto para adicionar planetas à sua galáxia!!! 
+
+### Rodando os testes dentro do container
+
+Com os containers do sistema rodando, abra um terminal e digite
+
+```docker
+docker exec -it swapp /bin/sh   # comando para entrar no container
+
+go test ./...                   # roda todos os testes automatizados após entrar no container
+```
+
+## Rodando sem o docker
+Para rodar o sistema sem o docker é necessário que você possua o golang instalado em sua máquina (caso não o tenha, veja [aqui](https://golang.org/doc/install) como fazer) e tenha acesso ao mongoDB (seja pelo Atlas Database ou qualquer outra forma).
+
+Feito isso, você precisa criar o arquivo .env na raiz do projeto com os dados do seu mongoDB 
+
+```docker
+#.env
+PORT=":8000"
+MONGODB_URL= #Aqui vai a url do seu cluster
+MONGODB_DATABASE= #seu banco de dados
+MONGODB_TEST_DATABASE= #o banco de dados que será utilizado para os testes automatizados
+```
+
+Abrir um terminal na raiz do projeto e baixar as dependências de desenvolvimento e rodar sua aplicação
+
+```docker
+go mod download # baixa as dependências
+go run app/main.go # roda a aplicação
+```
+
+## Endpoints
+
+- localhost:8000/api/   
+  - Method: GET | Mensagem de boas-vindas
+- localhost:8000/api/planet 
+  - Method: POST | Adiciona um novo planeta
+  - Request body
+    - name: string - obrigatório
+    - climate: string - obrigatório
+    - terrain: string - obrigatório
+- localhost:8000/api/planet/:id
+  - Method: GET | busca um determinado planeta pelo id
+- localhost:8000/api/planet/:id
+  - Method: DELETE | deleta um determinado planeta pelo id
+- localhost:8000/api/planets
+  - Method: GET | lista e procura por planetas
+  - Query params:
+    - name: nome do planeta
+    - page: página da lista 
