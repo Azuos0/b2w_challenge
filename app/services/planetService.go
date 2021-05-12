@@ -23,13 +23,13 @@ type PlanetService struct {
 }
 
 type SearchResponse struct {
-	Page      int64            `json:"page"`
-	PerPage   int64            `json:"perPage"`
-	Prev      int64            `json:"prev"`
-	Next      int64            `json:"next"`
-	Total     int64            `json:"total"`
-	TotalPage int64            `json:"totalPage"`
-	Result    *[]models.Planet `json:"result"`
+	Page      int64           `json:"page"`
+	PerPage   int64           `json:"perPage"`
+	Prev      int64           `json:"prev"`
+	Next      int64           `json:"next"`
+	Total     int64           `json:"total"`
+	TotalPage int64           `json:"totalPage"`
+	Result    []models.Planet `json:"result"`
 }
 
 type swapiPlanetResponse struct {
@@ -177,7 +177,7 @@ func (client *PlanetService) Search(page int64, name string) (*SearchResponse, e
 		PerPage:   paginatedData.Pagination.PerPage,
 		Total:     paginatedData.Pagination.Total,
 		TotalPage: paginatedData.Pagination.TotalPage,
-		Result:    &planets,
+		Result:    planets,
 	}
 
 	return &result, nil

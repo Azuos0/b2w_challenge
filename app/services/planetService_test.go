@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -142,46 +143,76 @@ func TestListPlanets(t *testing.T) {
 	mock1, service := mockPlanet(planet1)
 	mock2, _ := mockPlanet(planet2)
 
-	planets := &[]models.Planet{*mock1, *mock2}
-
 	res, err := service.Search(1, "")
 
+	planets := []models.Planet{*mock1, *mock2}
+
 	require.Nil(t, err)
+
 	require.Equal(t, planets, res.Result)
 	require.Equal(t, int64(2), res.Total)
+
+	require.Contains(t, res.Result, *mock1)
+	require.Contains(t, res.Result, *mock2)
 
 	clearDatabase(service.Collection)
 }
 
-// func TestSearchPlanet(t *testing.T) {
-// 	planet1 := models.Planet{
-// 		Name:    "Tatooine",
-// 		Climate: "Arid",
-// 		Terrain: "Desert",
-// 	}
+func TestSearchPlanet(t *testing.T) {
+	planet1 := models.Planet{
+		Name:    "Tatooine",
+		Climate: "Arid",
+		Terrain: "Desert",
+	}
 
-// 	planet2 := models.Planet{
-// 		Name:    "Tund",
-// 		Climate: "unknown",
-// 		Terrain: "barren, ash",
-// 	}
+	planet2 := models.Planet{
+		Name:    "Tund",
+		Climate: "unknown",
+		Terrain: "barren, ash",
+	}
 
-// 	mockedPlanet, service := mockPlanet(planet1)
-// 	mockPlanet(planet2)
+	mockedPlanet, service := mockPlanet(planet1)
+	mockPlanet(planet2)
 
-// 	res, err := service.Search(1, mockedPlanet.Name)
+	res, err := service.Search(1, mockedPlanet.Name)
 
-// 	require.Nil(t, err)
-// 	require.Equal(t, int64(1), res.Total)
+	require.Nil(t, err)
+	require.Equal(t, int64(1), res.Total)
+	require.Contains(t, res.Result, *mockedPlanet)
 
-// 	for _, p range res.Result {
+	clearDatabase(service.Collection)
+}
 
-// 	}
+func TestSearchPlanetWithStringCaseInsensitve(t *testing.T) {
+	planet1 := models.Planet{
+		Name:    "Tatooine",
+		Climate: "Arid",
+		Terrain: "Desert",
+	}
 
-// 	require.Equal(t, int64(1), res.Total)
+	planet2 := models.Planet{
+		Name:    "Tund",
+		Climate: "unknown",
+		Terrain: "barren, ash",
+	}
 
-// 	clearDatabase(service.Collection)
-// }
+	mockedPlanet1, service := mockPlanet(planet1)
+	mockedPlanet2, _ := mockPlanet(planet2)
+
+	res1, err := service.Search(1, strings.ToUpper(mockedPlanet1.Name))
+
+	require.Nil(t, err)
+	require.Equal(t, int64(1), res1.Total)
+	require.Contains(t, res1.Result, *mockedPlanet1)
+
+	res2, err := service.Search(1, strings.ToUpper(mockedPlanet2.Name))
+
+	require.Nil(t, err)
+	require.Equal(t, int64(1), res2.Total)
+	require.Contains(t, res2.Result, *mockedPlanet2)
+
+	clearDatabase(service.Collection)
+}
 
 func TestDeletePlanet(t *testing.T) {
 	planet := models.Planet{

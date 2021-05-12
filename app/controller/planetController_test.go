@@ -49,6 +49,13 @@ func addMockPlanet(planet models.Planet) string {
 	return mockedPlanet.ID.Hex()
 }
 
+func addMockPlanet2(planet models.Planet) *models.Planet {
+	planetService := services.NewPlanetService(app.DB)
+	mockedPlanet, _ := planetService.Create(planet)
+
+	return mockedPlanet
+}
+
 func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	app.Router.ServeHTTP(rr, req)
@@ -175,4 +182,109 @@ func TestDeleteNonExistentPlanet(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &m)
 
 	require.Equal(t, "no planet with this id was found in this so far far away galaxy", m["error"])
+}
+
+func TestListPlanets(t *testing.T) {
+	planet := models.Planet{
+		Name:    "Tatooine",
+		Terrain: "Desert",
+		Climate: "Arid",
+	}
+
+	planet2 := models.Planet{
+		Name:    "Tund",
+		Climate: "unknown",
+		Terrain: "barren, ash",
+	}
+
+	mockedPlanet1 := addMockPlanet2(planet)
+	mockedPlanet2 := addMockPlanet2(planet2)
+
+	req, _ := http.NewRequest("GET", "/api/planets", nil)
+	response := executeRequest(req)
+
+	var m services.SearchResponse
+	json.Unmarshal(response.Body.Bytes(), &m)
+
+	require.Equal(t, http.StatusOK, response.Code)
+	require.Equal(t, int64(2), m.Total)
+	require.Equal(t, int64(1), m.TotalPage)
+	require.Contains(t, m.Result, *mockedPlanet1)
+	require.Contains(t, m.Result, *mockedPlanet2)
+
+	clearDatabase()
+}
+
+func TestSearchNonExistentPlanet(t *testing.T) {
+	planet := models.Planet{
+		Name:    "Tatooine",
+		Terrain: "Desert",
+		Climate: "Arid",
+	}
+	addMockPlanet(planet)
+
+	urlString := "/api/planets?name=Tholoth"
+
+	req, _ := http.NewRequest("GET", urlString, nil)
+	response := executeRequest(req)
+
+	var m services.SearchResponse
+	json.Unmarshal(response.Body.Bytes(), &m)
+
+	require.Equal(t, http.StatusOK, response.Code)
+	require.Empty(t, m.Result)
+
+	clearDatabase()
+}
+func TestSearchExistentPlanet(t *testing.T) {
+	planet1 := models.Planet{
+		Name:    "Tatooine",
+		Terrain: "Desert",
+		Climate: "Arid",
+	}
+	planet2 := models.Planet{
+		Name:    "Tholoth",
+		Terrain: "Unknown",
+		Climate: "Unknown",
+	}
+
+	addMockPlanet(planet1)
+	mockedPlanet := addMockPlanet2(planet2)
+
+	urlString := "/api/planets?name=Tholoth"
+
+	req, _ := http.NewRequest("GET", urlString, nil)
+	response := executeRequest(req)
+
+	var m services.SearchResponse
+	json.Unmarshal(response.Body.Bytes(), &m)
+
+	require.Equal(t, http.StatusOK, response.Code)
+	require.NotEmpty(t, m.Result)
+	require.Contains(t, m.Result, *mockedPlanet)
+
+	clearDatabase()
+}
+
+func TestListPagination(t *testing.T) {
+	planet := models.Planet{
+		Name:    "Tatooine",
+		Terrain: "Desert",
+		Climate: "Arid",
+	}
+	addMockPlanet(planet)
+
+	urlString := "/api/planets?page=2"
+
+	req, _ := http.NewRequest("GET", urlString, nil)
+	response := executeRequest(req)
+
+	var m services.SearchResponse
+	json.Unmarshal(response.Body.Bytes(), &m)
+
+	require.Equal(t, http.StatusOK, response.Code)
+	require.Equal(t, int64(2), m.Page)
+	require.Empty(t, m.Result)
+
+	clearDatabase()
 }
