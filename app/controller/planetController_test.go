@@ -184,37 +184,6 @@ func TestDeleteNonExistentPlanet(t *testing.T) {
 	require.Equal(t, "no planet with this id was found in this so far far away galaxy", m["error"])
 }
 
-func TestListPlanets(t *testing.T) {
-	planet := models.Planet{
-		Name:    "Tatooine",
-		Terrain: "Desert",
-		Climate: "Arid",
-	}
-
-	planet2 := models.Planet{
-		Name:    "Tund",
-		Climate: "unknown",
-		Terrain: "barren, ash",
-	}
-
-	mockedPlanet1 := addMockPlanet2(planet)
-	mockedPlanet2 := addMockPlanet2(planet2)
-
-	req, _ := http.NewRequest("GET", "/api/planets", nil)
-	response := executeRequest(req)
-
-	var m services.SearchResponse
-	json.Unmarshal(response.Body.Bytes(), &m)
-
-	require.Equal(t, http.StatusOK, response.Code)
-	require.Equal(t, int64(2), m.Total)
-	require.Equal(t, int64(1), m.TotalPage)
-	require.Contains(t, m.Result, *mockedPlanet1)
-	require.Contains(t, m.Result, *mockedPlanet2)
-
-	clearDatabase()
-}
-
 func TestSearchNonExistentPlanet(t *testing.T) {
 	planet := models.Planet{
 		Name:    "Tatooine",
