@@ -88,6 +88,8 @@ go test -v ./...
 
 ## Endpoints
 
+Clique [aqui](https://app.swaggerhub.com/apis-docs/Azuos0/b-2_w_star_wars/1.0.0) para ver os Endpoints pelo swagger
+
 - localhost:8000/api/   
   - Method: GET | Mensagem de boas-vindas
 - localhost:8000/api/planet 
